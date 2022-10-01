@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.bean.SourceBean;
+import com.github.tvbox.osc.util.HawkConfig;
+import com.orhanobut.hawk.Hawk;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -59,11 +61,14 @@ public class CheckboxSearchAdapter extends ListAdapter<SourceBean, CheckboxSearc
         SourceBean sourceBean = data.get(position);
         holder.oneSearchSource.setOnCheckedChangeListener(null);
         holder.oneSearchSource.setText(sourceBean.getName());
-        holder.oneSearchSource.setChecked(mCheckedSources.containsKey(sourceBean.getKey()));
+        if (mCheckedSources != null) {
+            holder.oneSearchSource.setChecked(mCheckedSources.containsKey(sourceBean.getKey()));
+            Hawk.put(HawkConfig.SOURCES_FOR_SEARCH, mCheckedSources);
+        }
         holder.oneSearchSource.setTag(sourceBean);
         holder.oneSearchSource.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     mCheckedSources.put(sourceBean.getKey(), sourceBean);
                 } else {

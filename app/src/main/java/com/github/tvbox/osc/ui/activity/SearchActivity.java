@@ -36,6 +36,7 @@ import com.github.tvbox.osc.ui.tv.QRCodeGen;
 import com.github.tvbox.osc.ui.tv.widget.SearchKeyboard;
 import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.HawkConfig;
+import com.github.tvbox.osc.util.SearchHelper;
 import com.github.tvbox.osc.viewmodel.SourceViewModel;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -81,7 +82,7 @@ public class SearchActivity extends BaseActivity {
     private String searchTitle = "";
     private TextView tvSearchCheckboxBtn;
 
-    private HashMap<String, SourceBean> mCheckSourcees = null;
+    private HashMap<String, SourceBean> mCheckSources = null;
     private SearchCheckboxDialog mSearchCheckboxDialog = null;
 
     @Override
@@ -249,21 +250,15 @@ public class SearchActivity extends BaseActivity {
         tvSearchCheckboxBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<SourceBean> allSourceBean = ApiConfig.get().getSourceBeanList();
-                List<SourceBean> searchAbleSource = new ArrayList<>();
                 if (mSearchCheckboxDialog == null) {
-                    mCheckSourcees = new HashMap<>();
-                }
-                for(SourceBean sourceBean : allSourceBean) {
-                    if (sourceBean.isSearchable()) {
-                        searchAbleSource.add(sourceBean);
-                        if (mSearchCheckboxDialog == null) {
-                            mCheckSourcees.put(sourceBean.getKey(), sourceBean);
+                    List<SourceBean> allSourceBean = ApiConfig.get().getSourceBeanList();
+                    List<SourceBean> searchAbleSource = new ArrayList<>();
+                    for(SourceBean sourceBean : allSourceBean) {
+                        if (sourceBean.isSearchable()) {
+                            searchAbleSource.add(sourceBean);
                         }
                     }
-                }
-                if (mSearchCheckboxDialog == null) {
-                    mSearchCheckboxDialog = new SearchCheckboxDialog(SearchActivity.this, searchAbleSource, mCheckSourcees);
+                    mSearchCheckboxDialog = new SearchCheckboxDialog(SearchActivity.this, searchAbleSource, mCheckSources);
                 }
                 mSearchCheckboxDialog.show();
             }
@@ -314,6 +309,7 @@ public class SearchActivity extends BaseActivity {
 //                    @Override
 //                    public void onSuccess(Response<String> response) {
 //                        try {
+//                            ArrayList<String> hots = new ArrayList<>();
 //                            String result = response.body();
 //                            JsonObject json = JsonParser.parseString(result).getAsJsonObject();
 //                            JsonArray itemList = json.get("data").getAsJsonArray();
@@ -335,6 +331,7 @@ public class SearchActivity extends BaseActivity {
 
     private void initData() {
         refreshQRCode();
+        initCheckedSourcesForSearch();
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("title")) {
             String title = intent.getStringExtra("title");
@@ -369,6 +366,7 @@ public class SearchActivity extends BaseActivity {
                         return response.body().string();
                     }
                 });
+
     }
 
     private void refreshQRCode() {
@@ -395,6 +393,10 @@ public class SearchActivity extends BaseActivity {
                 searchData(null);
             }
         }
+    }
+
+    private void initCheckedSourcesForSearch() {
+        mCheckSources = SearchHelper.getSourcesForSearch();
     }
 
     private void search(String title) {
@@ -433,7 +435,7 @@ public class SearchActivity extends BaseActivity {
             if (!bean.isSearchable()) {
                 continue;
             }
-            if (mCheckSourcees != null && !mCheckSourcees.containsKey(bean.getKey())) {
+            if (mCheckSources != null && !mCheckSources.containsKey(bean.getKey())) {
                 continue;
             }
             siteKey.add(bean.getKey());
@@ -499,17 +501,17 @@ public class SearchActivity extends BaseActivity {
         EventBus.getDefault().unregister(this);
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            int keyCode = event.getKeyCode();
-            if (keyCode == KeyEvent.KEYCODE_MENU) {
-                if(!hasKeyBoard)enableKeyboard(SearchActivity.this);
-                openSystemKeyBoard();//再次尝试拉起键盘
-                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            }
-        } else if (event.getAction() == KeyEvent.ACTION_UP) {
-        }
-        return super.dispatchKeyEvent(event);
-    }
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+//            int keyCode = event.getKeyCode();
+//            if (keyCode == KeyEvent.KEYCODE_MENU) {
+//                if(!hasKeyBoard)enableKeyboard(SearchActivity.this);
+//                openSystemKeyBoard();//再次尝试拉起键盘
+//                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+//            }
+//        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+//        }
+//        return super.dispatchKeyEvent(event);
+//    }
 }
