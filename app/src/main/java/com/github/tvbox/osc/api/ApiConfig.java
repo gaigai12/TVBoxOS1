@@ -127,7 +127,7 @@ public class ApiConfig {
     }
 
     public void loadConfig(boolean useCache, LoadConfigCallback callback, Activity activity) {
-        String apiUrl = Hawk.get(HawkConfig.API_URL, "https://gaigai12.github.io/gougou/gai.json");
+        String apiUrl = Hawk.get(HawkConfig.API_URL, "https://gaigai.anglesya.win/gai.json");
         if (apiUrl.isEmpty()) {
             callback.error("-1");
             return;
